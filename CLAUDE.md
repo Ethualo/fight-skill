@@ -2,11 +2,19 @@
 
 적대적 검증 Claude Code 플러그인. 실행 코드 없음. 프로토콜 문서와 훅만 있다.
 
+## 설치
+
+```
+/plugin marketplace add C:\Users\user\Desktop\git_projects\fight-skill
+/plugin install fight@fight
+```
+
 ## 구조
 
 | 경로 | 역할 |
 |---|---|
 | `.claude-plugin/plugin.json` | 플러그인 매니페스트 |
+| `.claude-plugin/marketplace.json` | 마켓플레이스 매니페스트. 설치 진입점 |
 | `skills/fight-audit/SKILL.md` | 제안자·감사자 비대칭 검증. 순차 2회 호출 |
 | `skills/fight-clarify/SKILL.md` | 양극단 해석 분기. 병렬 2회 호출 |
 | `hooks/hooks.json` | SessionStart 훅 정의 |
@@ -27,7 +35,7 @@
 - **감사자의 보고 규칙을 완화하지 마라.** 실패 시나리오를 요구하는 조항이 억지 반대를 막는 유일한 장치다.
 - **감사자에게 "이의 없음"을 허용해야 한다.** 매번 무언가를 내라고 강제하면 그 자체가 억지 반대다.
 - **`fight-clarify`는 축을 하나만 고른다.** 두 개 이상 벌리면 두 안의 차이를 읽을 수 없다.
-- **훅은 Node.js에 의존한다.** `cat`은 Windows `cmd`에 없고 `echo`는 UTF-8 여러 줄을 깨뜨려서 `node`를 쓴다.
+- **훅은 Node.js에 의존한다.** `cat`은 Windows `cmd`에 없고 `echo`는 UTF-8 여러 줄을 깨뜨려서 `node`를 쓴다. 플러그인 루트 경로는 `process.env.CLAUDE_PLUGIN_ROOT`로 읽지 않고 `${CLAUDE_PLUGIN_ROOT}`를 커맨드 문자열에 그대로 넣어 `argv`로 넘긴다. Claude Code가 셸에 넘기기 전에 문자열 치환을 하므로 환경변수 미설정에 영향받지 않는다.
 - 스킬 본문을 고치면 `plugin.json`의 patch 버전을 올린다.
 
 ## 검증
