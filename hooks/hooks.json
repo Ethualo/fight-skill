@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"process.stdout.write(require('fs').readFileSync(process.env.CLAUDE_PLUGIN_ROOT+'/hooks/askuserquestion-rule.md','utf8'))\""
+            "command": "node -e \"process.stdout.write(require('fs').readFileSync(process.argv[1],'utf8'))\" \"${CLAUDE_PLUGIN_ROOT}/hooks/askuserquestion-rule.md\""
           }
         ]
       }
