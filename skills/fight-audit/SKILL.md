@@ -11,7 +11,7 @@ description: 유저 지시나 제안을 컨텍스트가 격리된 두 서브에�
 
 ## 1단계 — 제안자 호출
 
-`Agent` 툴, `subagent_type: general-purpose`, `run_in_background: false`.
+`Agent` 툴, `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`.
 
 프롬프트 템플릿. 중괄호 부분을 채워 쓴다.
 
@@ -45,6 +45,10 @@ description: 유저 지시나 제안을 컨텍스트가 격리된 두 서브에�
 ## 2단계 — 감사자 호출
 
 제안자 결과를 받은 뒤 호출한다.
+
+`Agent` 툴, `subagent_type: general-purpose`, `model: opus`, `run_in_background: false`.
+
+두 호출 모두 `model`을 명시한다. 생략하면 부모 세션 모델을 상속하므로, Sonnet 세션에서 부르면 감사자가 조용히 Sonnet이 된다. 출력 형식은 그대로라 열화를 알아챌 방법이 없다. 감사자는 보고 규칙의 근거·실패 시나리오를 지어내지 않고 실제로 확인해야 하므로 상위모델로 고정한다. 제안자는 틀려도 감사자가 잡으므로 고정하지 않아도 된다.
 
 ````
 너는 감사자다. 탐색은 최대한, 보고는 증거가 있는 것만.
