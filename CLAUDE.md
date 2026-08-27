@@ -46,3 +46,26 @@
 1. 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다.
 2. 결함 있는 지시 → 구체적 실패 시나리오와 함께 `BLOCK`이 나온다.
 3. 모호한 지시 → 두 안이 실제로 갈리고, 일치 부분은 유저에게 묻지 않는다.
+
+<!-- handoff:learnings:begin -->
+## Session Learnings (auto-updated by handoff)
+
+### Implicit Rules
+- Exactly 2 subagent calls per skill, one round, main thread judges (no custom agent definitions, no auto-chaining clarify→audit)
+- Windows 10, PowerShell primary, Git Bash available, no jq (use PowerShell ConvertFrom-Json/ConvertTo-Json)
+- Use python not python3. Node at C:\Program Files\nodejs\node.exe
+- Git user Ethualo / mrleek32@gmail.com
+- Session runs caveman mode (terse Korean replies) + ponytail mode (laziest working solution) via SessionStart hooks
+- Two fact-forcing gates intercept first Bash call, file creation, destructive commands
+- Korean prose throughout docs/skills; frontmatter keys, JSON keys, tool names, severity tags (BLOCK/WARN/NOTE) stay in original form
+- Hook command uses ${CLAUDE_PLUGIN_ROOT} interpolation by Claude Code into command string, passed as argv (not environment variable read inside script)
+- Patch version bumped in plugin.json when SKILL.md body changes
+
+### Key Decisions
+- Decision: Subagents perform static verification only (JSON parse, frontmatter, cross-file string identity, hook command standalone run) → Reason: Cannot restart host or invoke uninstalled plugin skill; live verification 1–3 deferred to user
+- Decision: Batch all 4 plan tasks into ONE implementer dispatch → Reason: Plan held complete final text of all files, file sets disjoint, pure transcription
+- Decision: Feature branch instead of git worktree → Reason: Fresh single-purpose repo, no other work in flight
+- Decision: Fixed Critical + 3 Important + 2 Minors; SKIPPED Minor requesting context-budget line → Reason: Spec section 9 deliberately open pending real scenario runs; hardcoding now would fossilize baseless value
+- Decision: Sonnet not haiku for transcription → Reason: Nested code fences (5-backtick containing 4-backtick containing 3-backtick) + exact-match Korean strings
+
+<!-- handoff:learnings:end -->
