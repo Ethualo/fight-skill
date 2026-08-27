@@ -1,0 +1,14 @@
+{
+  "name": "fight",
+  "description": "적대적 검증 Claude Code 플러그인 마켓플레이스",
+  "owner": {
+    "name": "Ethualo"
+  },
+  "plugins": [
+    {
+      "name": "fight",
+      "source": "./",
+      "description": "적대적 검증 — 컨텍스트가 격리된 두 서브에이전트로 유저 지시를 검증하고 모호한 지시를 구체화한다"
+    }
+  ]
+}
