@@ -24,8 +24,8 @@ Claude Code 쪽 안내는 [CLAUDE.md](CLAUDE.md) 참고. `skills/*/SKILL.md`는 
 
 - Windows 10, PowerShell 우선
 - 외부 환경변수 없음
-- Codex 모델 서열: `sol` > `terra` > `luna`. reasoning effort는 `light`~`max` 5단계
-- Codex 서브에이전트 모델: fight-audit은 제안자 `gpt-5.6-terra`(reasoning `extra-high`) / 감사자 `gpt-5.6-sol`(reasoning `medium`, 비용 절감 실험 중 — 벤더 권장은 `max`, 실측 후 조정) 고정(감사자만 상위 모델 — 근거는 `skills/fight-audit/SKILL.md` 2단계), fight-clarify는 두 호출 모두 `gpt-5.6-luna`(reasoning `max`, 대칭 구조라 열화 리스크 없고 해석 작업 자체가 "명확한 구현" 범주)
+- Codex 모델 서열: `sol` > `terra` > `luna`. reasoning effort는 `low`/`medium`/`high`/`xhigh`/`max`/`ultra` 6단계
+- Codex 서브에이전트 모델: fight-audit은 제안자 `gpt-5.6-terra`(reasoning `xhigh`) / 감사자 `gpt-5.6-sol`(reasoning `medium`, 비용 절감 실험 중 — 벤더 권장은 `max`, 실측 후 조정) 고정(감사자만 상위 모델 — 근거는 `skills/fight-audit/SKILL.md` 2단계), fight-clarify는 두 호출 모두 `gpt-5.6-luna`(reasoning `max`, 대칭 구조라 열화 리스크 없고 해석 작업 자체가 "명확한 구현" 범주)
 - Claude Code 서브에이전트 모델: fight-audit은 제안자 `sonnet` / 감사자 `opus` 고정, fight-clarify는 미고정(부모 세션 모델 상속) — 근거는 `skills/fight-audit/SKILL.md` 2단계 참고
 
 ## 주요 패턴
@@ -60,8 +60,8 @@ Claude Code 쪽 안내는 [CLAUDE.md](CLAUDE.md) 참고. `skills/*/SKILL.md`는 
 ### Key Decisions
 - Decision: Support both Claude Code and Codex — Reason: user explicitly rejected completing the Codex-only migration and required both platforms.
 - Decision: Keep one shared SKILL.md protocol body per skill and branch only subagent invocation contracts — Reason: preserves identical anti-fabrication, evidence, and main-thread judgment rules while adapting to Agent versus Codex spawn mechanisms.
-- Decision: Codex fight-audit proposer = gpt-5.6-terra with reasoning extra-high — Reason: multi-file analysis, structural improvement, and complex debugging fit the vendor-fact task band; auditor remains the backstop.
-- Decision: Codex fight-audit auditor = gpt-5.6-sol with reasoning medium — Reason: user explicitly chose a cost-versus-rigor experiment while retaining sol-versus-terra model heterogeneity; escalate to extra-high or max if evidence or failure-scenario quality degrades.
+- Decision: Codex fight-audit proposer = gpt-5.6-terra with reasoning xhigh — Reason: multi-file analysis, structural improvement, and complex debugging fit the vendor-fact task band; auditor remains the backstop.
+- Decision: Codex fight-audit auditor = gpt-5.6-sol with reasoning medium — Reason: user explicitly chose a cost-versus-rigor experiment while retaining sol-versus-terra model heterogeneity; escalate to xhigh or max if evidence or failure-scenario quality degrades.
 - Decision: Codex fight-clarify uses gpt-5.6-luna with reasoning max for both interpreters — Reason: symmetric interpretation exposes thin or divergent plans directly and does not need asymmetric model protection.
 - Decision: Claude Code fight-audit remains sonnet proposer and opus auditor; fight-clarify remains parent-model inherited — Reason: prior measured Claude-side decision remains valid and no new contrary evidence surfaced.
 - Decision: Never silently substitute an unavailable model; use no external provider, CLI, or MCP — Reason: self-contained plugin and detectable configuration failure are required for trustworthy verification.

@@ -37,9 +37,9 @@ Codex 쪽 안내는 [AGENTS.md](AGENTS.md) 참고. 스킬 본문(`skills/*/SKILL
 | 플랫폼 | `fight-audit` | `fight-clarify` |
 |---|---|---|
 | Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
-| Codex | 제안자 `gpt-5.6-terra`(reasoning `extra-high`), 감사자 `gpt-5.6-sol`(reasoning `medium`, 비용 실험 중) | 두 호출 모두 `gpt-5.6-luna`, reasoning `max` |
+| Codex | 제안자 `gpt-5.6-terra`(reasoning `xhigh`), 감사자 `gpt-5.6-sol`(reasoning `medium`, 비용 실험 중) | 두 호출 모두 `gpt-5.6-luna`, reasoning `max` |
 
-Codex 모델 서열: `sol` > `terra` > `luna`. `fight-audit` 감사자만 상위 모델(`sol`)로 고정 — Claude Code의 opus/sonnet과 동일한 이유(감사자가 제안자와 같은 모델이면 자기 오류를 못 잡음). effort는 벤더 가이드상 설계·보안급 판단에 `max`가 권장되지만, 비용 때문에 우선 `medium`으로 낮춰 실측 중이다 — 라이브 검증에서 근거·실패 시나리오 기준이 부실해지면 `extra-high`/`max`로 올린다. 제안자는 다중 파일 분석·복잡한 디버깅 범주라 `terra`+`extra-high`. `fight-clarify`는 대칭 구조라 열화 리스크가 없고 해석 작업 자체도 "명확한 구현" 범주라 `luna`+`max`를 그대로 쓴다.
+Codex 모델 서열: `sol` > `terra` > `luna`. reasoning effort는 `low`/`medium`/`high`/`xhigh`/`max`/`ultra` 6단계. `fight-audit` 감사자만 상위 모델(`sol`)로 고정 — Claude Code의 opus/sonnet과 동일한 이유(감사자가 제안자와 같은 모델이면 자기 오류를 못 잡음). effort는 벤더 가이드상 설계·보안급 판단에 `max`가 권장되지만, 비용 때문에 우선 `medium`으로 낮춰 실측 중이다 — 라이브 검증에서 근거·실패 시나리오 기준이 부실해지면 `xhigh`/`max`로 올린다. 제안자는 다중 파일 분석·복잡한 디버깅 범주라 `terra`+`xhigh`. `fight-clarify`는 대칭 구조라 열화 리스크가 없고 해석 작업 자체도 "명확한 구현" 범주라 `luna`+`max`를 그대로 쓴다.
 
 Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다. 지정 모델을 사용할 수 없으면 다른 모델로 조용히 대체하지 않고 중단한다. 외부 provider·CLI·MCP는 사용하지 않는다.
 
@@ -78,8 +78,8 @@ Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다
 ### Key Decisions
 - Decision: Support both Claude Code and Codex — Reason: user explicitly rejected completing the Codex-only migration and required both platforms.
 - Decision: Keep one shared SKILL.md protocol body per skill and branch only subagent invocation contracts — Reason: preserves identical anti-fabrication, evidence, and main-thread judgment rules while adapting to Agent versus Codex spawn mechanisms.
-- Decision: Codex fight-audit proposer = gpt-5.6-terra with reasoning extra-high — Reason: multi-file analysis, structural improvement, and complex debugging fit the vendor-fact task band; auditor remains the backstop.
-- Decision: Codex fight-audit auditor = gpt-5.6-sol with reasoning medium — Reason: user explicitly chose a cost-versus-rigor experiment while retaining sol-versus-terra model heterogeneity; escalate to extra-high or max if evidence or failure-scenario quality degrades.
+- Decision: Codex fight-audit proposer = gpt-5.6-terra with reasoning xhigh — Reason: multi-file analysis, structural improvement, and complex debugging fit the vendor-fact task band; auditor remains the backstop.
+- Decision: Codex fight-audit auditor = gpt-5.6-sol with reasoning medium — Reason: user explicitly chose a cost-versus-rigor experiment while retaining sol-versus-terra model heterogeneity; escalate to xhigh or max if evidence or failure-scenario quality degrades.
 - Decision: Codex fight-clarify uses gpt-5.6-luna with reasoning max for both interpreters — Reason: symmetric interpretation exposes thin or divergent plans directly and does not need asymmetric model protection.
 - Decision: Claude Code fight-audit remains sonnet proposer and opus auditor; fight-clarify remains parent-model inherited — Reason: prior measured Claude-side decision remains valid and no new contrary evidence surfaced.
 - Decision: Never silently substitute an unavailable model; use no external provider, CLI, or MCP — Reason: self-contained plugin and detectable configuration failure are required for trustworthy verification.
