@@ -1,8 +1,10 @@
 # fight
 
-적대적 검증 Claude Code 플러그인. 실행 코드 없음. 프로토콜 문서와 훅만 있다.
+적대적 검증 플러그인. Claude Code와 Codex 양쪽을 지원한다. 실행 코드 없음. 프로토콜 문서와 훅만 있다.
 
-## 설치
+Codex 쪽 안내는 [AGENTS.md](AGENTS.md) 참고. 스킬 본문(`skills/*/SKILL.md`)은 두 플랫폼이 공유하며, 호출 계약(서브에이전트 스폰 방식)만 플랫폼별로 분기한다.
+
+## 설치 (Claude Code)
 
 ```
 /plugin marketplace add C:\Users\user\Desktop\git_projects\fight-skill
@@ -13,20 +15,31 @@
 
 | 경로 | 역할 |
 |---|---|
-| `.claude-plugin/plugin.json` | 플러그인 매니페스트 |
+| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트 |
 | `.claude-plugin/marketplace.json` | 마켓플레이스 매니페스트. 설치 진입점 |
-| `skills/fight-audit/SKILL.md` | 제안자·감사자 비대칭 검증. 순차 2회 호출 |
-| `skills/fight-clarify/SKILL.md` | 양극단 해석 분기. 병렬 2회 호출 |
-| `hooks/hooks.json` | SessionStart 훅 정의 |
+| `.codex-plugin/plugin.json` | Codex 플러그인 매니페스트 |
+| `AGENTS.md` | Codex가 읽는 작업 지침. 이 파일의 Codex 쪽 대응물 |
+| `skills/fight-audit/SKILL.md` | 제안자·감사자 비대칭 검증. 순차 2회 호출. 양 플랫폼 공유 |
+| `skills/fight-clarify/SKILL.md` | 양극단 해석 분기. 병렬 2회 호출. 양 플랫폼 공유 |
+| `hooks/hooks.json` | SessionStart 훅 정의 (Claude Code 전용, Codex는 사용 안 함) |
 | `hooks/askuserquestion-rule.md` | 훅이 주입하는 규칙 전문 |
-| `docs/superpowers/specs/` | 설계 스펙 |
-| `docs/superpowers/plans/` | 구현 계획 |
+| `docs/superpowers/specs/` | 설계 스펙 (플랫폼 공통 근거) |
+| `docs/superpowers/plans/` | 최초 Claude Code 구현 계획 (역사 기록) |
 
 ## 설계 근거
 
 `fight-audit`은 비대칭, `fight-clarify`는 대칭이다. 비대칭은 편향을, 대칭은 분산을 잡는다.
 같은 모델 두 개로 대칭을 구성하면 동조 방지가 원리적으로 성립하지 않는다.
 자세한 근거는 스펙 2절 "결정: 역할 구조"에 있다.
+
+## 모델 정책
+
+| 플랫폼 | `fight-audit` | `fight-clarify` |
+|---|---|---|
+| Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
+| Codex | 제안자·감사자 `gpt-5.6-luna`, reasoning `max` | 두 호출 모두 `gpt-5.6-luna`, reasoning `max` |
+
+Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다. 지정 모델을 사용할 수 없으면 다른 모델로 조용히 대체하지 않고 중단한다. 외부 provider·CLI·MCP는 사용하지 않는다.
 
 ## 주의사항
 
