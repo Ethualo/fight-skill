@@ -1,15 +1,17 @@
 # fight
 
-적대적 검증 플러그인. Claude Code와 Codex 양쪽을 지원한다. 실행 코드 없음. 프로토콜 문서와 훅만 있다.
+적대적 검증 플러그인. Claude Code와 Codex 양쪽에서 공통 프로토콜 본문을 공유하지만 호출 문법·도구·훅·모델 해석은 다르다. 서브에이전트 오케스트레이터는 없고, Claude Code 전용 Node.js SessionStart 훅만 규칙을 주입한다.
 
 Codex 유지보수·모델·검증 명령은 [AGENTS.md](AGENTS.md)를 참고한다. 스킬 본문(`skills/*/SKILL.md`)은 두 플랫폼이 공유하며, 호출 계약(서브에이전트 스폰 방식)만 플랫폼별로 분기한다.
 
 ## 설치 (Claude Code)
 
 ```
-/plugin marketplace add C:\Users\user\Desktop\git_projects\fight-skill
+/plugin marketplace add Ethualo/fight-skill
 /plugin install fight@fight
 ```
+
+로컬 체크아웃에서는 첫 명령에 로컬 클론 경로를 쓴다. 갱신은 `/plugin marketplace update fight` → `/plugin update fight@fight` → `/reload-plugins` 또는 재시작 순서다.
 
 ## 구조
 
@@ -18,6 +20,7 @@ Codex 유지보수·모델·검증 명령은 [AGENTS.md](AGENTS.md)를 참고한
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트 |
 | `.claude-plugin/marketplace.json` | 마켓플레이스 매니페스트. 설치 진입점 |
 | `.codex-plugin/plugin.json` | Codex 플러그인 매니페스트 |
+| `.agents/plugins/marketplace.json` | Codex repo marketplace. 저장소 루트 플러그인을 노출 |
 | `AGENTS.md` | Codex가 읽는 작업 지침. 이 파일의 Codex 쪽 대응물 |
 | `skills/fight-audit/SKILL.md` | 제안자·감사자 비대칭 검증. 순차 2회 호출. 양 플랫폼 공유 |
 | `skills/fight-clarify/SKILL.md` | 양극단 해석 분기. 병렬 2회 호출. 양 플랫폼 공유 |
@@ -38,13 +41,13 @@ Codex 유지보수·모델·검증 명령은 [AGENTS.md](AGENTS.md)를 참고한
 |---|---|---|
 | Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
 
-Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.md)의 환경과 주요 패턴을 기준으로 한다.
+Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.md)의 환경과 주요 패턴을 기준으로 한다. 표의 모델은 스킬이 요청하는 값이며, 매니페스트가 모델 가용성·대체 여부를 강제하지는 않는다.
 
-두 플랫폼 모두 외부 provider·CLI·MCP를 사용하지 않으며, 지정 모델을 사용할 수 없을 때 조용히 대체하지 않는다.
+두 플랫폼 모두 외부 provider·CLI·MCP를 사용하지 않는다. Claude Code와 Codex 호스트가 요청 모델을 쓸 수 없거나 대체하면 메인 에이전트가 이를 밝히고 호출을 중단해야 한다. 이 규칙은 호스트 준수에 의존한다.
 
 ## 주의사항
 
-- **서브에이전트 호출은 스킬당 정확히 2회.** 라운드를 늘리면 비용만 두 배가 되고 판정은 거의 바뀌지 않는다.
+- **서브에이전트 호출은 스킬당 정확히 2회라는 프로토콜이다.** 호스트가 따르도록 지시하지만 플러그인 파일이 계수·강제하지는 않는다.
 - **판정은 메인 스레드가 한다.** 심판 서브에이전트를 추가하지 마라. 메인만 대화 히스토리와 코드베이스 컨텍스트를 가진다.
 - **감사자의 보고 규칙을 완화하지 마라.** 실패 시나리오를 요구하는 조항이 억지 반대를 막는 유일한 장치다.
 - **감사자에게 "이의 없음"을 허용해야 한다.** 매번 무언가를 내라고 강제하면 그 자체가 억지 반대다.
@@ -59,7 +62,7 @@ Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.m
 
 | 시나리오 | 내용 | Claude Code | Codex |
 |---|---|---|---|
-| 1 | 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다 | 통과 | 실행됨 (제안안 `BLOCK`, 정상 기준 미달) |
+| 1 | 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다 | 통과 | 기대값 미충족 — 제안안 결함으로 유효한 `BLOCK` 발생 |
 | 2 | 결함 있는 지시 → 구체적 실패 시나리오와 함께 `BLOCK`이 나온다 | 통과 | 통과 |
 | 3 | 모호한 지시 → 두 안이 실제로 갈리고, 일치 부분은 유저에게 묻지 않는다 | 통과 | 통과 |
 
