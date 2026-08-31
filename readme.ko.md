@@ -1,0 +1,138 @@
+# fight
+
+![version](https://img.shields.io/badge/version-0.3.6-blue)
+![license](https://img.shields.io/badge/license-MIT-green)
+![platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-lightgrey)
+
+**적대적 검증 플러그인.** 유저의 지시나 제안을 컨텍스트가 격리된 서브에이전트에게 붙여 메인 스레드 단독으로는 나오지 않는 검증과 대안을 얻는다. Claude Code와 Codex 양쪽에서 동일하게 동작한다. 실행 코드는 없다 — 프로토콜 문서와 훅뿐이다.
+
+## 왜 필요한가
+
+단일 컨텍스트의 LLM 세션은 유저 제안에 무비판적으로 동의하는 경향(동조)이 있다. 또한 유저 본인도 아직 언어화하지 못한 요구를, 메인 스레드 혼자서는 실물 대안으로 드러내기 어렵다.
+
+이 설계가 성립하는 근거는 "토론"이 아니라 **컨텍스트 격리**다. 서브에이전트는 메인 스레드의 추론 캐시를 공유하지 않으므로 메인이 이미 유창하게 전개한 논리에 끌려가지 않는다. 자세한 설계 근거는 [`docs/superpowers/specs/2026-08-27-fight-plugin-design.md`](docs/superpowers/specs/2026-08-27-fight-plugin-design.md)에 있다.
+
+## 핵심 개념
+
+플러그인은 스킬 두 개를 제공한다. 구조가 다른 이유는 편의가 아니라 잡으려는 오류의 종류가 다르기 때문이다.
+
+| | `fight-audit` | `fight-clarify` |
+|---|---|---|
+| 구조 | 비대칭 (제안자 → 감사자) | 대칭 (해석자 A ‖ 해석자 B) |
+| 호출 순서 | 순차 2회 | 병렬 2회 (같은 메시지) |
+| 잡는 오류 | 편향 — 동조, 놓친 리스크 | 분산 — 서로 다른 해석 |
+| 쓰는 시점 | 되돌리기 비용이 큰 판단 (아키텍처, 구현 방향, 의존성 추가) | 지시가 여러 해석을 허용할 때 |
+| 출력 | 권장안 1개 + WARN/NOTE 목록 | 두 안이 갈리는 지점(명세 공백) |
+
+같은 모델 두 개로 대칭을 구성하면 동조 방지가 원리적으로 성립하지 않는다 — 같은 모델은 같은 지시에 같은 방향으로 아부한다. `fight-audit`은 그래서 비대칭 구조로 편향을 잡고 `fight-clarify`는 애초에 편향이 아니라 해석 공간을 벌리는 게 목적이므로 대칭으로 둔다.
+
+## 설치
+
+### Claude Code
+
+```
+/plugin marketplace add C:\Users\user\Desktop\git_projects\fight-skill
+/plugin install fight@fight
+```
+
+Git 원격 소스로 설치한 경우 갱신은 `/plugin update fight@fight` 다음 Claude Code 재시작.
+
+### Codex
+
+Codex 쪽 플러그인 매니페스트는 [`.codex-plugin/plugin.json`](.codex-plugin/plugin.json). 설치 절차는 사용 중인 Codex CLI/앱의 플러그인 설치 문서를 따른다. 유지보수·모델 정책은 [AGENTS.md](AGENTS.md) 참고.
+
+## 빠른 시작
+
+설치 후 대화 중 아래처럼 호출한다.
+
+```
+$fight-audit로 이 구현 방향을 검증해줘.
+$fight-clarify로 이 지시의 양극단 구현안을 보여줘.
+```
+
+`fight-audit` 예시 흐름: 제안자가 구현안을 내면(가정에 `[가정:근거]`/`[가정:공백]` 태그), 감사자가 전제·문제정의·대안·비용·실패모드·되돌리기 여섯 축을 각각 `BLOCK`/`WARN`/`NOTE`/`통과`로 판정하고, 지적마다 구체적 실패 시나리오(입력·상태 → 잘못된 결과)를 붙인다. 여섯 축이 모두 통과면 억지 지적 없이 "이의 없음"으로 끝난다.
+
+`fight-clarify` 예시 흐름: 지시에서 가장 큰 애매함 축 하나를 골라 양극단(A/B)으로 벌리고 두 해석자를 병렬로 호출한다. 두 안이 일치하는 부분은 조용히 확정하고 갈린 부분만 `AskUserQuestion`으로 유저에게 올린다.
+
+## 아키텍처
+
+```mermaid
+sequenceDiagram
+    participant M as 메인 스레드
+    participant P as 제안자
+    participant A as 감사자
+    M->>P: 지시 + 컨텍스트 (유저 선호 비공개)
+    P-->>M: 구현안 + 가정 태그
+    M->>A: 지시 + 제안자의 안
+    A-->>M: 6축 판정 + 실패 시나리오
+    M->>M: 판정 (합의는 확정, 충돌만 질문)
+```
+
+```mermaid
+sequenceDiagram
+    participant M as 메인 스레드
+    participant X as 해석자 A (극단 1)
+    participant Y as 해석자 B (극단 2)
+    M->>X: 지시 + 극단 A 배정
+    M->>Y: 지시 + 극단 B 배정
+    par 같은 메시지에서 병렬
+        X-->>M: 구현안 A
+        Y-->>M: 구현안 B
+    end
+    M->>M: 일치점 확정, 갈린 점만 질문
+```
+
+## 구조
+
+| 경로 | 역할 |
+|---|---|
+| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트 |
+| `.claude-plugin/marketplace.json` | 마켓플레이스 매니페스트. 설치 진입점 |
+| `.codex-plugin/plugin.json` | Codex 플러그인 매니페스트 |
+| `AGENTS.md` | Codex가 읽는 작업 지침 |
+| `CLAUDE.md` | Claude Code가 읽는 작업 지침 |
+| `skills/fight-audit/SKILL.md` | 제안자·감사자 비대칭 검증. 순차 2회 호출. 양 플랫폼 공유 |
+| `skills/fight-clarify/SKILL.md` | 양극단 해석 분기. 병렬 2회 호출. 양 플랫폼 공유 |
+| `hooks/hooks.json` | SessionStart 훅 정의 (Claude Code 전용) |
+| `hooks/askuserquestion-rule.md` | 훅이 주입하는 규칙 전문 |
+| `docs/superpowers/specs/` | 설계 스펙 (플랫폼 공통 근거) |
+| `docs/superpowers/plans/` | 최초 Claude Code 구현 계획 (역사 기록) |
+
+## 모델 정책
+
+| 플랫폼 | `fight-audit` | `fight-clarify` |
+|---|---|---|
+| Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
+| Codex | 제안자 `gpt-5.6-terra`(xhigh), 감사자 `gpt-5.6-sol`(medium) | 두 호출 모두 `gpt-5.6-luna`(max) |
+
+감사자·해석자에 제안자보다 상위 모델을 쓰는 이유는 같다 — 같은 모델은 자기 오류를 못 잡으므로 모델 티어 자체를 다르게 가져가야 이질성이 생긴다. 두 플랫폼 모두 외부 provider·CLI·MCP를 사용하지 않으며 지정 모델을 사용할 수 없을 때 조용히 대체하지 않고 유저에게 중단 사유를 알린다.
+
+## 검증 결과
+
+단위 테스트가 없다. 실행 로직이 없기 때문이다. 검증은 계획 문서의 시나리오 1–3을 실제 호출로 재현한다.
+
+| 시나리오 | 내용 | Claude Code | Codex |
+|---|---|---|---|
+| 1 | 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다 | 통과 | 실행됨 (제안안 `BLOCK`, 정상 기준 미달) |
+| 2 | 결함 있는 지시 → 구체적 실패 시나리오와 함께 `BLOCK`이 나온다 | 통과 | 통과 |
+| 3 | 모호한 지시 → 두 안이 실제로 갈리고, 일치 부분은 유저에게 묻지 않는다 | 통과 | 통과 |
+
+## 제한사항
+
+- 서브에이전트 호출은 스킬당 정확히 2회 고정이다. 라운드를 늘리지 않는다.
+- 판정은 메인 스레드가 한다. 제3의 심판 서브에이전트를 두지 않는다.
+- 외부 provider·CLI·MCP를 호출하지 않는다. 지정 모델을 못 쓰면 대체하지 않고 중단한다.
+- `fight-clarify`는 애매함 축을 하나만 고른다. 두 개 이상 벌리면 두 안의 차이가 어느 축에서 왔는지 읽을 수 없다.
+- Claude Code 훅은 Node.js에 의존한다 (`cat`/`echo` 대신 사용 — Windows `cmd`·UTF-8 여러 줄 문제 회피).
+
+## 기여
+
+[CONTRIBUTING.md](CONTRIBUTING.md) 참고.
+
+## 라이선스
+
+[MIT](LICENSE)
+
+## 문의
+
+작성: [Ethualo](https://github.com/Ethualo). 이슈·제안은 저장소 이슈 트래커로.
