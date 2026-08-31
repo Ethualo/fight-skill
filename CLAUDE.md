@@ -2,7 +2,7 @@
 
 적대적 검증 플러그인. Claude Code와 Codex 양쪽을 지원한다. 실행 코드 없음. 프로토콜 문서와 훅만 있다.
 
-Codex 쪽 안내는 [AGENTS.md](AGENTS.md) 참고. 스킬 본문(`skills/*/SKILL.md`)은 두 플랫폼이 공유하며, 호출 계약(서브에이전트 스폰 방식)만 플랫폼별로 분기한다.
+Codex 유지보수·모델·검증 명령은 [AGENTS.md](AGENTS.md)를 참고한다. 스킬 본문(`skills/*/SKILL.md`)은 두 플랫폼이 공유하며, 호출 계약(서브에이전트 스폰 방식)만 플랫폼별로 분기한다.
 
 ## 설치 (Claude Code)
 
@@ -37,11 +37,10 @@ Codex 쪽 안내는 [AGENTS.md](AGENTS.md) 참고. 스킬 본문(`skills/*/SKILL
 | 플랫폼 | `fight-audit` | `fight-clarify` |
 |---|---|---|
 | Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
-| Codex | 제안자 `gpt-5.6-terra`(reasoning `xhigh`), 감사자 `gpt-5.6-sol`(reasoning `medium`, 비용 실험 중) | 두 호출 모두 `gpt-5.6-luna`, reasoning `max` |
 
-Codex 모델 서열: `sol` > `terra` > `luna`. reasoning effort는 `low`/`medium`/`high`/`xhigh`/`max`/`ultra` 6단계. `fight-audit` 감사자만 상위 모델(`sol`)로 고정 — Claude Code의 opus/sonnet과 동일한 이유(감사자가 제안자와 같은 모델이면 자기 오류를 못 잡음). effort는 벤더 가이드상 설계·보안급 판단에 `max`가 권장되지만, 비용 때문에 우선 `medium`으로 낮춰 실측 중이다 — 라이브 검증에서 근거·실패 시나리오 기준이 부실해지면 `xhigh`/`max`로 올린다. 제안자는 다중 파일 분석·복잡한 디버깅 범주라 `terra`+`xhigh`. `fight-clarify`는 대칭 구조라 열화 리스크가 없고 해석 작업 자체도 "명확한 구현" 범주라 `luna`+`max`를 그대로 쓴다.
+Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.md)의 환경과 주요 패턴을 기준으로 한다.
 
-Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다. 지정 모델을 사용할 수 없으면 다른 모델로 조용히 대체하지 않고 중단한다. 외부 provider·CLI·MCP는 사용하지 않는다.
+두 플랫폼 모두 외부 provider·CLI·MCP를 사용하지 않으며, 지정 모델을 사용할 수 없을 때 조용히 대체하지 않는다.
 
 ## 주의사항
 
@@ -58,31 +57,33 @@ Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다
 단위 테스트가 없다. 실행 로직이 없기 때문이다. 검증은 실제 호출로 한다.
 계획 문서의 시나리오 1–3을 그대로 다시 돌린다.
 
-1. 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다.
-2. 결함 있는 지시 → 구체적 실패 시나리오와 함께 `BLOCK`이 나온다.
-3. 모호한 지시 → 두 안이 실제로 갈리고, 일치 부분은 유저에게 묻지 않는다.
+| 시나리오 | 내용 | Claude Code | Codex |
+|---|---|---|---|
+| 1 | 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다 | 통과 | 실행됨 (제안안 `BLOCK`, 정상 기준 미달) |
+| 2 | 결함 있는 지시 → 구체적 실패 시나리오와 함께 `BLOCK`이 나온다 | 통과 | 통과 |
+| 3 | 모호한 지시 → 두 안이 실제로 갈리고, 일치 부분은 유저에게 묻지 않는다 | 통과 | 통과 |
+
+Codex 시나리오 1은 감사자가 여섯 축·근거·실패 시나리오를 모두 출력했지만, 제안안의 결함 때문에 `이의 없음`이 아니라 유효한 `BLOCK`으로 끝났다. 시나리오 2와 3은 기대 결과를 확인했다.
 
 <!-- handoff:learnings:begin -->
 ## Session Learnings (auto-updated by handoff)
 
 ### Implicit Rules
 - Windows 10; PowerShell primary; use python, not python3; Node.js at C:\Program Files\nodejs\node.exe; no jq.
-- All user-facing and project documentation prose is Korean; preserve frontmatter keys, JSON keys, tool names, severity tags, and assumption tags.
-- Shared skill bodies must remain platform-neutral except for explicit invocation-contract branches; exactly two subagents per skill; fight-audit sequential; fight-clarify same-message parallel; main thread judges.
-- Codex subagents use fork_context=false and explicit model plus reasoning effort; Claude Code uses Agent with platform-specific model rules.
-- If a specified model is unavailable, stop and report the reason; never silently fall back.
-- When SKILL.md changes, bump both .claude-plugin/plugin.json and .codex-plugin/plugin.json versions and rerun plugin/skill validators.
-- Claude Code executes a versioned cache snapshot under ~/.claude/plugins/cache/fight/fight/{version}; repository edits require claude plugin update fight@fight before live verification.
-- Use plugin-creator validate_plugin.py and skill-creator quick_validate.py with UTF-8 mode for Korean skill files.
+- User-facing and project documentation prose Korean; preserve frontmatter keys, JSON keys, tool names, severity tags, and assumption tags.
+- Shared skills remain platform-neutral except invocation-contract branches; exactly two subagents per skill; fight-audit sequential; fight-clarify same-message parallel; main thread judges.
+- Codex subagents use fork_context=false with explicit model and reasoning; unavailable models never silently replaced.
+- No external provider, CLI, or MCP fallback; skill changes require both manifest version bumps and validator reruns.
+- Claude Code runs versioned installed cache snapshots; worktree edits are not installation proof; refresh cache before Claude live claims.
+- Preserve unrelated WIP; distinguish edited, validated, committed, installed, and published states.
 
 ### Key Decisions
-- Decision: Support both Claude Code and Codex — Reason: user explicitly rejected completing the Codex-only migration and required both platforms.
-- Decision: Keep one shared SKILL.md protocol body per skill and branch only subagent invocation contracts — Reason: preserves identical anti-fabrication, evidence, and main-thread judgment rules while adapting to Agent versus Codex spawn mechanisms.
-- Decision: Codex fight-audit proposer = gpt-5.6-terra with reasoning xhigh — Reason: multi-file analysis, structural improvement, and complex debugging fit the vendor-fact task band; auditor remains the backstop.
-- Decision: Codex fight-audit auditor = gpt-5.6-sol with reasoning medium — Reason: user explicitly chose a cost-versus-rigor experiment while retaining sol-versus-terra model heterogeneity; escalate to xhigh or max if evidence or failure-scenario quality degrades.
-- Decision: Codex fight-clarify uses gpt-5.6-luna with reasoning max for both interpreters — Reason: symmetric interpretation exposes thin or divergent plans directly and does not need asymmetric model protection.
-- Decision: Claude Code fight-audit remains sonnet proposer and opus auditor; fight-clarify remains parent-model inherited — Reason: prior measured Claude-side decision remains valid and no new contrary evidence surfaced.
-- Decision: Never silently substitute an unavailable model; use no external provider, CLI, or MCP — Reason: self-contained plugin and detectable configuration failure are required for trustworthy verification.
-- Decision: Bump both platform manifests together to v0.3.5 when shared skills change — Reason: prevents repository and installed snapshot version drift.
+- Decision: support Claude Code and Codex — Reason: preserve user-required dual-platform compatibility.
+- Decision: keep one shared SKILL.md protocol body per skill, branch only invocation contracts — Reason: preserve identical verification rules while adapting Agent versus Codex spawn mechanisms.
+- Decision: Codex fight-audit proposer gpt-5.6-terra xhigh and auditor gpt-5.6-sol medium — Reason: retain model heterogeneity while measuring cost versus audit rigor; current medium run preserved evidence and failure-scenario gates.
+- Decision: Codex fight-clarify uses two gpt-5.6-luna max calls in the same message — Reason: symmetric interpretation requires parallel divergence without cross-review.
+- Decision: restrict current documentation work to AGENTS.md and CLAUDE.md — Reason: user selected minimal scope; defer README, public docs, and marketplace expansion.
+- Decision: keep plugin version 0.3.6 — Reason: current changes are documentation-only; skills and manifests unchanged.
+- Decision: preserve manual WIP and auto-managed handoff blocks — Reason: avoid overwriting user changes and keep future resume context bounded.
 
 <!-- handoff:learnings:end -->
