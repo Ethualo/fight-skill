@@ -37,7 +37,9 @@ Codex 쪽 안내는 [AGENTS.md](AGENTS.md) 참고. 스킬 본문(`skills/*/SKILL
 | 플랫폼 | `fight-audit` | `fight-clarify` |
 |---|---|---|
 | Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
-| Codex | 제안자·감사자 `gpt-5.6-luna`, reasoning `max` | 두 호출 모두 `gpt-5.6-luna`, reasoning `max` |
+| Codex | 제안자 `gpt-5.6-terra`(reasoning `extra-high`), 감사자 `gpt-5.6-sol`(reasoning `medium`, 비용 실험 중) | 두 호출 모두 `gpt-5.6-luna`, reasoning `max` |
+
+Codex 모델 서열: `sol` > `terra` > `luna`. `fight-audit` 감사자만 상위 모델(`sol`)로 고정 — Claude Code의 opus/sonnet과 동일한 이유(감사자가 제안자와 같은 모델이면 자기 오류를 못 잡음). effort는 벤더 가이드상 설계·보안급 판단에 `max`가 권장되지만, 비용 때문에 우선 `medium`으로 낮춰 실측 중이다 — 라이브 검증에서 근거·실패 시나리오 기준이 부실해지면 `extra-high`/`max`로 올린다. 제안자는 다중 파일 분석·복잡한 디버깅 범주라 `terra`+`extra-high`. `fight-clarify`는 대칭 구조라 열화 리스크가 없고 해석 작업 자체도 "명확한 구현" 범주라 `luna`+`max`를 그대로 쓴다.
 
 Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다. 지정 모델을 사용할 수 없으면 다른 모델로 조용히 대체하지 않고 중단한다. 외부 provider·CLI·MCP는 사용하지 않는다.
 
@@ -64,25 +66,23 @@ Codex 호출은 `fork_context: false`로 메인 추론을 상속하지 않는다
 ## Session Learnings (auto-updated by handoff)
 
 ### Implicit Rules
-- Exactly 2 subagent calls per skill, one round, main thread judges (no custom agent definitions, no auto-chaining clarify→audit)
-- Windows 10, PowerShell primary, Git Bash available, no jq (use PowerShell ConvertFrom-Json/ConvertTo-Json)
-- Use python not python3. Node at C:\Program Files\nodejs\node.exe
-- Git user Ethualo / mrleek32@gmail.com
-- Session runs caveman mode (terse Korean replies) + ponytail mode (laziest working solution) via SessionStart hooks
-- Two fact-forcing gates intercept first Bash call, file creation, destructive commands
-- Korean prose throughout docs/skills; frontmatter keys, JSON keys, tool names, severity tags (BLOCK/WARN/NOTE) stay in original form
-- Hook command uses ${CLAUDE_PLUGIN_ROOT} interpolation by Claude Code into command string, passed as argv (not environment variable read inside script)
-- Patch version bumped in plugin.json when SKILL.md body changes
-- Branch dev is working branch, master/feat/fight-plugin local-only, dev pushed to origin/dev tracking remote
+- Windows 10; PowerShell primary; use python, not python3; Node.js at C:\Program Files\nodejs\node.exe; no jq.
+- All user-facing and project documentation prose is Korean; preserve frontmatter keys, JSON keys, tool names, severity tags, and assumption tags.
+- Shared skill bodies must remain platform-neutral except for explicit invocation-contract branches; exactly two subagents per skill; fight-audit sequential; fight-clarify same-message parallel; main thread judges.
+- Codex subagents use fork_context=false and explicit model plus reasoning effort; Claude Code uses Agent with platform-specific model rules.
+- If a specified model is unavailable, stop and report the reason; never silently fall back.
+- When SKILL.md changes, bump both .claude-plugin/plugin.json and .codex-plugin/plugin.json versions and rerun plugin/skill validators.
+- Claude Code executes a versioned cache snapshot under ~/.claude/plugins/cache/fight/fight/{version}; repository edits require claude plugin update fight@fight before live verification.
+- Use plugin-creator validate_plugin.py and skill-creator quick_validate.py with UTF-8 mode for Korean skill files.
 
 ### Key Decisions
-- Decision: Symmetric vs asymmetric role structures — role asymmetry is SUBSTITUTE FOR MODEL DIVERSITY. Symmetric structures catch VARIANCE; asymmetric structures catch BIAS. Two instances of SAME model arranged symmetrically CANNOT catch sycophancy—both fawn identically, agreement reads as raised confidence. agent-arena prior art required heterogeneous models (Codex vs Claude) precisely for this. This plugin refuses heterogeneous models (external CLI dependency breaks self-containment). Therefore ROLE ASYMMETRY INJECTED VIA PROMPT creates artificial heterogeneity: auditor objective is "find why wrong" not "find best answer", same model has no incentive to fawn. Secondary: auditor did not author plan, no attachment to defend. fight-clarify is symmetric because job is spreading interpretation space, not catching bias; ambiguous instructions contain genuine variance. Full argument: spec section 2, 결정: 역할 구조.
-- Decision: Two anti-fabrication gates prevent forced disagreement failure mode. Gate 1: make AGREEMENT expensive—each 6 axes requires evidence even to mark 통과, naming file:line/command/function inspected. Blank pass forbidden, lazy agreement harder than lazy disagreement. Stronger than instruction alone (instruction skimmable, empty slot cannot). Gate 2: every finding must carry concrete failure scenario (input+state→wrong result) or DISCARDED—fabricated objections cannot produce one. Auditor explicitly ALLOWED to return 이의 없음; forcing output every invocation would itself be forced disagreement. Gate re-applied twice—auditor self-polices 2단계, main re-applies 3단계 so scenario-less findings are discarded not listed. Do not relax; these are the only thing separating plugin from noise generator.
-- Decision: Prior art research complete—zero real competitors found. zhjai/agent-arena (25 stars) only precedent: Claude Code skill, symmetric, heterogeneous models, preserves dissent, no anti-fabrication gate, no ambiguity elicitation, manual trigger, 7-stage pipeline, requires external CLI install/auth. magnus919/hermes-council (52 stars) is stub—README states unimplemented. Academic MAD repos (608, 341, stars) are paper code. 449-star awesome-claude-code-skills list: ZERO matches for debate|adversarial|critic|red team|dissent. GitHub code search: zero prior art for hooking AskUserQuestion as skill trigger. Niche empty; differentiation is anti-fabrication gate + AskUserQuestion entry path.
-- Decision: Subagents perform static verification only (JSON parse, frontmatter, cross-file string identity, hook command standalone run) → Reason: Cannot restart host or invoke uninstalled plugin skill; live verification 1–3 deferred to user
-- Decision: Batch all 4 plan tasks into ONE implementer dispatch → Reason: Plan held complete final text of all files, file sets disjoint, pure transcription
-- Decision: Feature branch instead of git worktree → Reason: Fresh single-purpose repo, no other work in flight
-- Decision: Fixed Critical + 3 Important + 2 Minors; SKIPPED Minor requesting context-budget line → Reason: Spec section 9 deliberately open pending real scenario runs; hardcoding now would fossilize baseless value
-- Decision: Sonnet not haiku for transcription → Reason: Nested code fences (5-backtick containing 4-backtick containing 3-backtick) + exact-match Korean strings
+- Decision: Support both Claude Code and Codex — Reason: user explicitly rejected completing the Codex-only migration and required both platforms.
+- Decision: Keep one shared SKILL.md protocol body per skill and branch only subagent invocation contracts — Reason: preserves identical anti-fabrication, evidence, and main-thread judgment rules while adapting to Agent versus Codex spawn mechanisms.
+- Decision: Codex fight-audit proposer = gpt-5.6-terra with reasoning extra-high — Reason: multi-file analysis, structural improvement, and complex debugging fit the vendor-fact task band; auditor remains the backstop.
+- Decision: Codex fight-audit auditor = gpt-5.6-sol with reasoning medium — Reason: user explicitly chose a cost-versus-rigor experiment while retaining sol-versus-terra model heterogeneity; escalate to extra-high or max if evidence or failure-scenario quality degrades.
+- Decision: Codex fight-clarify uses gpt-5.6-luna with reasoning max for both interpreters — Reason: symmetric interpretation exposes thin or divergent plans directly and does not need asymmetric model protection.
+- Decision: Claude Code fight-audit remains sonnet proposer and opus auditor; fight-clarify remains parent-model inherited — Reason: prior measured Claude-side decision remains valid and no new contrary evidence surfaced.
+- Decision: Never silently substitute an unavailable model; use no external provider, CLI, or MCP — Reason: self-contained plugin and detectable configuration failure are required for trustworthy verification.
+- Decision: Bump both platform manifests together to v0.3.5 when shared skills change — Reason: prevents repository and installed snapshot version drift.
 
 <!-- handoff:learnings:end -->

@@ -22,7 +22,7 @@ description: 유저 지시나 제안을 컨텍스트가 격리된 두 서브에�
 
 **Claude Code:** `Agent` 툴. `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`.
 
-**Codex:** subagent spawn 도구. `model: gpt-5.6-luna`, reasoning effort `max`, `fork_context: false`. 지정 모델을 쓸 수 없으면 다른 모델로 조용히 대체하지 말고 유저에게 중단 사유를 알린다.
+**Codex:** subagent spawn 도구. `model: gpt-5.6-terra`, reasoning effort `extra-high`, `fork_context: false`. 지정 모델을 쓸 수 없으면 다른 모델로 조용히 대체하지 말고 유저에게 중단 사유를 알린다.
 
 프롬프트 템플릿. 중괄호 부분을 채워 쓴다.
 
@@ -58,7 +58,7 @@ description: 유저 지시나 제안을 컨텍스트가 격리된 두 서브에�
 
 **Claude Code:** `Agent` 툴. `subagent_type: general-purpose`, `model: opus`, `run_in_background: false`. 두 호출 모두 `model`을 명시한다. 생략하면 부모 세션 모델을 상속하므로, Sonnet 세션에서 부르면 감사자가 조용히 Sonnet이 된다. 출력 형식은 그대로라 열화를 알아챌 방법이 없다. 감사자는 보고 규칙의 근거·실패 시나리오를 지어내지 않고 실제로 확인해야 하므로 상위모델로 고정한다. 제안자는 틀려도 감사자가 잡으므로 고정하지 않아도 된다.
 
-**Codex:** subagent spawn 도구. `model: gpt-5.6-luna`, reasoning effort `max`, `fork_context: false`. Codex는 모델 티어가 하나뿐이라 제안자·감사자를 같은 모델로 호출한다 — Claude Code 쪽의 열화 문제는 발생하지 않는다.
+**Codex:** subagent spawn 도구. `model: gpt-5.6-sol`, reasoning effort `medium`, `fork_context: false`. 모델 서열은 `sol` > `terra` > `luna` — 감사자에게 제안자(`terra`)보다 상위 모델을 쓰는 이유는 Claude Code의 opus/sonnet과 동일하다: 같은 모델은 자기 오류를 못 잡으므로 모델 티어 자체를 다르게 가져가야 이질성이 생긴다. effort를 `medium`으로 낮춘 것은 비용 절감 실험이다 — 벤더 가이드는 설계·보안급 판단에 `sol`+`max`를 권장하지만, 검증 목적상 필요한 건 "제안자와 다른 모델"이지 "최고 effort"가 아닐 수 있어 실측으로 확인 중이다. 라이브 검증에서 감사자가 근거·실패 시나리오 기준을 여전히 만족하는지 확인되면 `medium` 유지, 부실해지면 `extra-high`나 `max`로 올린다.
 
 ````
 너는 감사자다. 탐색은 최대한, 보고는 증거가 있는 것만.
