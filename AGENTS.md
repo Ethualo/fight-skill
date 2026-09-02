@@ -66,20 +66,14 @@ Claude Code 설치와 공통 개요는 [CLAUDE.md](CLAUDE.md)를 참고한다. `
 ## Session Learnings (auto-updated by handoff)
 
 ### Implicit Rules
-- Installed Claude Code plugin marketplaces with a Git source live as real git clones at ~/.claude/plugins/marketplaces/{marketplace-name}; `claude plugin update <plugin>@<marketplace>` decides whether to update by reading THAT LOCAL CLONE's checked-out .claude-plugin/plugin.json version (it does not itself fetch/pull) — so a stale or diverged clone silently blocks updates even when the source repo has a newer version.
-- `claude plugin marketplace update <name>` can print 'Successfully updated marketplace: <name>' without actually fast-forwarding the clone's local branch, if that local branch has diverged (non-fast-forward) from origin — always verify afterward with `git -C ~/.claude/plugins/marketplaces/<name> log`/plugin.json content, never trust the success message alone.
-- Fix for a stuck/diverged marketplace clone: `git -C <clone> fetch origin && git -C <clone> reset --hard origin/<default-branch>` — safe because it is a pure install-cache clone, never real user work, then retry `claude plugin update <plugin>@<marketplace>`.
-- A successful `claude plugin update` still requires restarting Claude Code before the new plugin version is actually loaded into a running session.
-- origin/dev's git history was rewritten/rebased at some point after commit e7084a6 during this project's work, orphaning an earlier merge-commit-based ancestry (3248e20, 0438f47, 0259c8c) from the new origin/dev tip even though those exact commit objects remain reachable locally — this is why a marketplace clone cloned before the rewrite shows as 'diverged' rather than simply 'behind'.
-- Codex reasoning effort has exactly 6 levels: low/medium/high/xhigh/max/ultra (corrects a previously-recorded wrong 5-level light/medium/high/extra-high/max).
+- gpt-5.6-sol is a Codex-only model; this repo's Claude Code session has no tool or CLI to invoke it directly — any effort-comparison rerun needs a literal Codex session.
+- CLAUDE.md's experimental scenario section (S1-S8) is user-owned content per prior handoff; edits to it should stay scoped to fixture text, not skill/manifest/model files, unless the user asks otherwise.
+- skills/fight-clarify/SKILL.md:10 states subagents don't cross-validate — this fact was not previously mirrored in either README, which is why it was chosen as the S7v2 addition.
 
 ### Key Decisions
-- Decision: Correct Codex reasoning-effort enumeration to low/medium/high/xhigh/max/ultra (6 levels) — Reason: user supplied this as the actual supported value set, replacing a previously-recorded wrong 5-level light/medium/high/extra-high/max.
-- Decision: Keep existing model/effort pins unchanged except the effort-level rename (extra-high→xhigh) — Reason: only the label was wrong, not the underlying pinned level; live Codex runs this session confirmed sol+medium still meets the evidence/failure-scenario bar.
-- Decision: Record per-scenario (1/2/3) x per-platform (Claude Code/Codex) pass status directly in CLAUDE.md's 검증 section as a table — Reason: user asked to make completion status explicit rather than leaving it only in ephemeral handoff summaries.
-- Decision: Keep scenario 1's Codex result worded precisely as 'executed, ended in a valid BLOCK because the test proposal had a real defect' rather than flattening to a plain pass — Reason: user explicitly chose accuracy ('유지 및 커밋') over a uniform-looking table.
-- Decision: Do not duplicate the new scenario-status table into AGENTS.md — Reason: user declined when asked; AGENTS.md keeps a narrower Codex-maintenance scope.
-- Decision: Remove CLAUDE.md's own Codex model-policy table row and point to AGENTS.md as single source instead — Reason: a concurrent Codex-session edit deduplicated this; reviewed and kept as a legitimate simplification.
-- Decision: Force-sync the stale ~/.claude/plugins/marketplaces/fight git clone via fetch + reset --hard origin/dev — Reason: user approved after confirmation it's a pure install-cache clone (not real work) that had diverged from origin/dev due to an earlier history rewrite.
+- Decision: Draft S7v2/S8v2 fixture wording directly in CLAUDE.md rather than attempting execution — Reason: user explicitly chose the fixture-only option after being told this session has no codex CLI to invoke the gpt-5.6-sol auditor.
+- Decision: S7v2 adds a new sentence (subagents don't cross-validate) instead of restating existing 순차/병렬 rules — Reason: v1 duplicated content already in AGENTS.md 주요패턴, which caused inconsistent low-effort verdicts; the new sentence is verifiably absent from both READMEs.
+- Decision: S8v2 specifies the exact replacement sentence for SKILL.md:83 plus a repo-vs-installed-cache boundary statement — Reason: v1 only said 'clarify wording' vaguely, leaving replacement text and install-completion criteria to auditor interpretation, which caused the low-effort BLOCK split; AGENTS.md already defines the repo/cache distinction so S8v2 just requires stating it explicitly.
+- Decision: Replace v1 rows outright rather than keep both — Reason: keeps the experimental scenario table from growing unbounded; v1 history is preserved in this handoff and the prior one, not in the live doc.
 
 <!-- handoff:learnings:end -->
