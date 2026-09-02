@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 860" role="img" aria-labelledby="title desc">
+  <title id="title">fight-audit과 fight-clarify 흐름</title>
+  <desc id="desc">fight-audit은 메인 스레드, 제안자, 감사자가 순차로 작업한다. fight-clarify는 메인 스레드가 해석자 A와 B를 병렬 호출해 결과를 비교한다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; fill: #24292f; }
+      .heading { font-size: 30px; font-weight: 700; }
+      .section { font-size: 23px; font-weight: 700; }
+      .node { font-size: 21px; font-weight: 700; fill: #ffffff; }
+      .detail { font-size: 17px; }
+      .caption { font-size: 18px; font-weight: 600; }
+      .line { fill: none; stroke: #57606a; stroke-width: 3; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #57606a; stroke-width: 3; stroke-dasharray: 9 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1400" height="860" rx="24" fill="#f6f8fa"/>
+  <text x="55" y="65" class="heading">Fight workflows</text>
+
+  <rect x="45" y="100" width="1310" height="300" rx="20" fill="#ffffff" stroke="#d0d7de" stroke-width="2"/>
+  <text x="75" y="145" class="section">fight-audit · 순차 2회 호출</text>
+  <rect x="75" y="225" width="190" height="74" rx="14" fill="#0969da"/>
+  <text x="170" y="270" text-anchor="middle" class="node">메인 스레드</text>
+  <rect x="335" y="225" width="190" height="74" rx="14" fill="#8250df"/>
+  <text x="430" y="270" text-anchor="middle" class="node">제안자</text>
+  <rect x="595" y="225" width="190" height="74" rx="14" fill="#0969da"/>
+  <text x="690" y="270" text-anchor="middle" class="node">메인 스레드</text>
+  <rect x="855" y="225" width="190" height="74" rx="14" fill="#cf222e"/>
+  <text x="950" y="270" text-anchor="middle" class="node">감사자</text>
+  <rect x="1115" y="225" width="190" height="74" rx="14" fill="#0969da"/>
+  <text x="1210" y="270" text-anchor="middle" class="node">메인 스레드</text>
+  <path d="M 265 262 H 325" class="line"/>
+  <path d="M 525 262 H 585" class="line"/>
+  <path d="M 785 262 H 845" class="line"/>
+  <path d="M 1045 262 H 1105" class="line"/>
+  <text x="295" y="207" text-anchor="middle" class="detail">지시 + 선택 컨텍스트</text>
+  <text x="555" y="207" text-anchor="middle" class="detail">구현안 + 가정</text>
+  <text x="815" y="207" text-anchor="middle" class="detail">지시 + 제안안</text>
+  <text x="1075" y="207" text-anchor="middle" class="detail">6축 판정 + 실패 시나리오</text>
+  <text x="690" y="355" text-anchor="middle" class="caption">합의는 확정 · 충돌만 질문</text>
+
+  <rect x="45" y="445" width="1310" height="370" rx="20" fill="#ffffff" stroke="#d0d7de" stroke-width="2"/>
+  <text x="75" y="490" class="section">fight-clarify · 같은 메시지에서 병렬 2회 호출</text>
+  <rect x="75" y="600" width="205" height="84" rx="14" fill="#0969da"/>
+  <text x="178" y="650" text-anchor="middle" class="node">메인 스레드</text>
+  <rect x="445" y="535" width="240" height="84" rx="14" fill="#8250df"/>
+  <text x="565" y="585" text-anchor="middle" class="node">해석자 A · 극단 1</text>
+  <rect x="445" y="675" width="240" height="84" rx="14" fill="#8250df"/>
+  <text x="565" y="725" text-anchor="middle" class="node">해석자 B · 극단 2</text>
+  <rect x="1010" y="600" width="270" height="84" rx="14" fill="#1a7f37"/>
+  <text x="1145" y="638" text-anchor="middle" class="node">메인 비교</text>
+  <text x="1145" y="665" text-anchor="middle" class="node">일치점 확정 · 차이점 질문</text>
+  <path d="M 280 620 C 340 620, 365 577, 435 577" class="line"/>
+  <path d="M 280 665 C 340 665, 365 717, 435 717" class="line"/>
+  <path d="M 685 577 C 810 577, 855 620, 1000 620" class="dash"/>
+  <path d="M 685 717 C 810 717, 855 665, 1000 665" class="dash"/>
+  <text x="354" y="555" text-anchor="middle" class="detail">지시 + 극단 A</text>
+  <text x="354" y="745" text-anchor="middle" class="detail">지시 + 극단 B</text>
+  <text x="822" y="555" text-anchor="middle" class="detail">구현안 A</text>
+  <text x="822" y="745" text-anchor="middle" class="detail">구현안 B</text>
+  <text x="565" y="645" text-anchor="middle" class="caption">서로 검증하지 않음</text>
+</svg>
