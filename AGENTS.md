@@ -67,14 +67,14 @@ Claude Code 설치와 공통 개요는 [CLAUDE.md](CLAUDE.md)를 참고한다. `
 ## Session Learnings (auto-updated by handoff)
 
 ### Implicit Rules
-- gpt-5.6-sol is a Codex-only model; this repo's Claude Code session has no tool or CLI to invoke it directly — any effort-comparison rerun needs a literal Codex session.
-- CLAUDE.md's experimental scenario section (S1-S8) is user-owned content per prior handoff; edits to it should stay scoped to fixture text, not skill/manifest/model files, unless the user asks otherwise.
-- skills/fight-clarify/SKILL.md:10 states subagents don't cross-validate — this fact was not previously mirrored in either README, which is why it was chosen as the S7v2 addition.
+- Repo has parallel platform support: Claude Code (.claude-plugin/) and Codex (.codex-plugin/, .agents/plugins/marketplace.json) — any skills/*/SKILL.md content change requires bumping ALL platform manifest versions together (documented rule in both CLAUDE.md and AGENTS.md '주의사항' sections).
+- Static validation commands: python C:\Users\user\.codex\skills\.system\plugin-creator\scripts\validate_plugin.py . and python -X utf8 C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\<skill-name> — must run via PowerShell tool, not Bash (Bash mangles Windows backslash paths).
+- Repo default branch for PRs is master; active dev branch is dev. No CI — verification is manual re-run of scenarios 1-3 from docs/superpowers/plans.
+- This session's Claude Code CLI has no Codex CLI/tool access, so any Codex-model (gpt-5.6-sol/terra/luna) live verification must happen in a literal Codex session, not here.
 
 ### Key Decisions
-- Decision: Draft S7v2/S8v2 fixture wording directly in CLAUDE.md rather than attempting execution — Reason: user explicitly chose the fixture-only option after being told this session has no codex CLI to invoke the gpt-5.6-sol auditor.
-- Decision: S7v2 adds a new sentence (subagents don't cross-validate) instead of restating existing 순차/병렬 rules — Reason: v1 duplicated content already in AGENTS.md 주요패턴, which caused inconsistent low-effort verdicts; the new sentence is verifiably absent from both READMEs.
-- Decision: S8v2 specifies the exact replacement sentence for SKILL.md:83 plus a repo-vs-installed-cache boundary statement — Reason: v1 only said 'clarify wording' vaguely, leaving replacement text and install-completion criteria to auditor interpretation, which caused the low-effort BLOCK split; AGENTS.md already defines the repo/cache distinction so S8v2 just requires stating it explicitly.
-- Decision: Replace v1 rows outright rather than keep both — Reason: keeps the experimental scenario table from growing unbounded; v1 history is preserved in this handoff and the prior one, not in the live doc.
+- Decision: bump only 3 manifest files (.claude-plugin/plugin.json, .codex-plugin/plugin.json, .agents/plugins/marketplace.json) → Reason: grep-verified .claude-plugin/marketplace.json carries no version field for fight plugin, so S8v2 spec's '3 versions' maps exactly to these 3 files.
+- Decision: merge dev→master via real merge commit, not fast-forward → Reason: git merge --ff-only failed since master had 3 prior sync merge commits not on dev's ancestry; diffed master-only vs dev-only commits first, confirmed no unique content in those merges, then did normal merge (clean, no conflicts).
+- Decision: backfill CHANGELOG.md history for 0.1.0-0.3.8 rather than starting empty at current version → Reason: user asked generically whether changelogs work for already-far-along projects; chose backfill approach for fight-skill specifically, cross-referencing plugin.json version strings per commit (cae3360, e7084a6, cea50f9, f647168, 84c07fd, 7e2d954, d325469, ac228ca) against commit dates via git show.
 
 <!-- handoff:learnings:end -->
