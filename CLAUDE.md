@@ -80,7 +80,7 @@ Codex 시나리오 1은 감사자가 여섯 축·근거·실패 시나리오를 
 | 5 — 불완전 배포 | `SKILL.md`를 수정하면서 한 플랫폼 매니페스트 또는 `.agents/plugins/marketplace.json`의 버전은 올리지 않는다 | `BLOCK` | 양 플랫폼 버전 규칙과 버전별 설치 캐시가 이전 본문을 계속 실행하는 경로 |
 | 6 — 컨텍스트 상한 위반 | 제안자에게 전체 저장소·git 이력·handoff를 넘기고 8개 파일/24,576-byte 상한을 없앤다 | `BLOCK` | `AGENTS.md`의 컨텍스트 예산과 큰 문서 묶음에서 비용·앵커링이 커지는 경로 |
 | 7v2 — 정상 문서 보강(비중복) | `CLAUDE.md`와 `AGENTS.md`에 "`fight-clarify`의 두 서브에이전트는 서로 검증하지 않는다"(`skills/fight-clarify/SKILL.md:10`) 한 문장을 각각 추가한다. 스킬·매니페스트·모델·설치는 건드리지 않는다 | `이의 없음` | 두 README 어디에도 이 문장이 없어 신규 보강이며, 문서 추가만으로 런타임이 바뀌지 않는다는 확인 |
-| 8v2 — 정상 스킬 문구 보강(정확 교체+배포 경계) | `skills/fight-clarify/SKILL.md:83`의 "두 안이 일치하는 부분은 지시가 실제로 명확했던 지점이다. 조용히 확정하고 묻지 않는다. 질문 공세를 막는 장치다."를 "두 안이 일치하는 부분은 지시가 실제로 명확했던 지점이므로 갈린 부분만 질문으로 올린다. 일치 부분을 다시 묻는 질문 공세를 막는 장치다."로 교체(의미 동일, 문구만 명확화)한다. 동시에 `.claude-plugin/plugin.json`·`.codex-plugin/plugin.json`·`.agents/plugins/marketplace.json` 세 버전을 patch 단위로 함께 올리고, "저장소 편집은 즉시 반영되지만 설치된 Claude Code 플러그인(`~/.claude/plugins/cache/fight/fight/{version}/`)은 `claude plugin update fight@fight` 실행과 재시작 전까지 이전 본문을 계속 실행한다"는 배포 경계를 PR 설명에 명시한다 | `이의 없음` 또는 비차단 `NOTE` | 교체 문구가 원문과 의미 동일함, 세 배포 표면 버전 동시 갱신, 저장소·설치본 경계 명시로 v1(S8)의 모호했던 교체 범위·설치 완료 기준이 해소됐다는 확인 |
+| 8v2 — 정상 스킬 문구 보강(정확 교체+배포 경계) | `skills/fight-clarify/SKILL.md:83`의 "두 안이 일치하는 부분은 지시가 실제로 명확했던 지점이다. 조용히 확정하고 묻지 않는다. 질문 공세를 막는 장치다."를 "두 안이 일치하는 부분은 지시가 실제로 명확했던 지점이므로 갈린 부분만 질문으로 올린다. 일치 부분을 다시 묻는 질문 공세를 막는 장치다."로 교체(의미 동일, 문구만 명확화)한다. 동시에 `.claude-plugin/plugin.json`·`.codex-plugin/plugin.json`·`.agents/plugins/marketplace.json` 세 버전을 `0.3.8`로 함께 올리고, `AGENTS.md`의 세 정적 검증 명령을 모두 실행한다. `0.3.8` 배포 후 Claude Code marketplace를 갱신하고 `claude plugin update fight@fight`와 재시작으로 설치본을 갱신한 뒤 Codex와 Claude Code에서 두 스킬을 각각 실제 호출해 subagent 수·순서·출력과 clarify가 공통점을 다시 묻지 않음을 확인한다. 배포 뒤 회귀가 확인되면 문장과 세 버전을 `0.3.9`로 함께 되돌려 같은 정적 검증을 다시 실행·배포하고, Claude Code marketplace·설치본을 갱신·재시작한 뒤 같은 라이브 검증을 다시 실행한다. "저장소 편집은 즉시 반영되지만 설치된 Claude Code 플러그인(`~/.claude/plugins/cache/fight/fight/{version}/`)은 `claude plugin update fight@fight` 실행과 재시작 전까지 이전 본문을 계속 실행한다"는 배포 경계를 PR 설명에 명시한다 | `이의 없음` 또는 비차단 `NOTE` | 교체 문구가 원문과 의미 동일함, 세 배포 표면 버전 동시 갱신과 정적·라이브 검증, 저장소·설치본 경계와 다음 patch 롤백 절차 명시로 v1(S8)의 모호했던 교체 범위·설치 완료 기준이 해소됐다는 확인 |
 
 > S7/S8 v2는 `.handoff` 검증(2026-09-02)에서 v1이 각각 "기존 README 계약과 중복"·"교체 문구·설치 범위 미명시"로 판정이 갈렸던 문제를 고치기 위해 재정의했다. v1 행은 기록 보존을 위해 유지하지 않고 이 표에서 교체한다.
 
@@ -88,18 +88,29 @@ Codex 시나리오 1은 감사자가 여섯 축·근거·실패 시나리오를 
 
 `low` 채택 조건은 15회 모두 기대 판정을 만족하고, `medium`보다 누락·근거 부실·정상안 오차단이 없어야 한다. 또한 실제 측정된 비용 또는 시간이 더 낮아야 한다. 어느 하나라도 만족하지 못하거나 측정값이 없으면 `medium`을 유지한다.
 
+#### S7v2/S8v2 재측정 결과 (2026-09-02)
+
+기준 커밋은 `ac228ca^`이며, 제안자 안·파일 발췌는 고정했다. 최종 S8v2는 정적·라이브 검증, marketplace→plugin update→재시작 순서, 다음 patch 롤백까지 명시한 안으로 다시 고정했다.
+
+| 시나리오 | low | medium | 결과 |
+|---|---:|---:|---|
+| 7v2 | 3/3 `이의 없음` | 3/3 `이의 없음` | 기대 판정 충족 |
+| 8v2 | 3/3 `이의 없음` | 3/3 `이의 없음` | 기대 판정 충족 |
+
+호스트는 서브에이전트별 토큰·비용·대기열 포함 시간을 제공하지 않아 모두 `측정 불가`다. 이 재측정은 S7v2/S8v2 여섯 조건만 덮으므로 15회 채택 조건을 충족하지 않으며, 비용·시간 우위도 입증되지 않았다. 기본 effort는 `medium`을 유지한다.
+
 <!-- handoff:learnings:begin -->
 ## Session Learnings (auto-updated by handoff)
 
 ### Implicit Rules
-- gpt-5.6-sol is a Codex-only model; this repo's Claude Code session has no tool or CLI to invoke it directly — any effort-comparison rerun needs a literal Codex session.
-- CLAUDE.md's experimental scenario section (S1-S8) is user-owned content per prior handoff; edits to it should stay scoped to fixture text, not skill/manifest/model files, unless the user asks otherwise.
-- skills/fight-clarify/SKILL.md:10 states subagents don't cross-validate — this fact was not previously mirrored in either README, which is why it was chosen as the S7v2 addition.
+- Repo has parallel platform support: Claude Code (.claude-plugin/) and Codex (.codex-plugin/, .agents/plugins/marketplace.json) — any skills/*/SKILL.md content change requires bumping ALL platform manifest versions together (documented rule in both CLAUDE.md and AGENTS.md '주의사항' sections).
+- Static validation commands: python C:\Users\user\.codex\skills\.system\plugin-creator\scripts\validate_plugin.py . and python -X utf8 C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\<skill-name> — must run via PowerShell tool, not Bash (Bash mangles Windows backslash paths).
+- Repo default branch for PRs is master; active dev branch is dev. No CI — verification is manual re-run of scenarios 1-3 from docs/superpowers/plans.
+- This session's Claude Code CLI has no Codex CLI/tool access, so any Codex-model (gpt-5.6-sol/terra/luna) live verification must happen in a literal Codex session, not here.
 
 ### Key Decisions
-- Decision: Draft S7v2/S8v2 fixture wording directly in CLAUDE.md rather than attempting execution — Reason: user explicitly chose the fixture-only option after being told this session has no codex CLI to invoke the gpt-5.6-sol auditor.
-- Decision: S7v2 adds a new sentence (subagents don't cross-validate) instead of restating existing 순차/병렬 rules — Reason: v1 duplicated content already in AGENTS.md 주요패턴, which caused inconsistent low-effort verdicts; the new sentence is verifiably absent from both READMEs.
-- Decision: S8v2 specifies the exact replacement sentence for SKILL.md:83 plus a repo-vs-installed-cache boundary statement — Reason: v1 only said 'clarify wording' vaguely, leaving replacement text and install-completion criteria to auditor interpretation, which caused the low-effort BLOCK split; AGENTS.md already defines the repo/cache distinction so S8v2 just requires stating it explicitly.
-- Decision: Replace v1 rows outright rather than keep both — Reason: keeps the experimental scenario table from growing unbounded; v1 history is preserved in this handoff and the prior one, not in the live doc.
+- Decision: bump only 3 manifest files (.claude-plugin/plugin.json, .codex-plugin/plugin.json, .agents/plugins/marketplace.json) → Reason: grep-verified .claude-plugin/marketplace.json carries no version field for fight plugin, so S8v2 spec's '3 versions' maps exactly to these 3 files.
+- Decision: merge dev→master via real merge commit, not fast-forward → Reason: git merge --ff-only failed since master had 3 prior sync merge commits not on dev's ancestry; diffed master-only vs dev-only commits first, confirmed no unique content in those merges, then did normal merge (clean, no conflicts).
+- Decision: backfill CHANGELOG.md history for 0.1.0-0.3.8 rather than starting empty at current version → Reason: user asked generically whether changelogs work for already-far-along projects; chose backfill approach for fight-skill specifically, cross-referencing plugin.json version strings per commit (cae3360, e7084a6, cea50f9, f647168, 84c07fd, 7e2d954, d325469, ac228ca) against commit dates via git show.
 
 <!-- handoff:learnings:end -->
