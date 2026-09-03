@@ -100,6 +100,37 @@ Codex 시나리오 1은 감사자가 여섯 축·근거·실패 시나리오를 
 
 호스트는 서브에이전트별 토큰·비용·대기열 포함 시간을 제공하지 않아 모두 `측정 불가`다. 이 재측정은 S7v2/S8v2 여섯 조건만 덮으므로 15회 채택 조건을 충족하지 않으며, 비용·시간 우위도 입증되지 않았다. 기본 effort는 `medium`을 유지한다.
 
+#### S4–S6 실측 결과 (2026-09-03)
+
+기준 커밋은 `ac228ca^`이며, 각 시나리오의 Terra `xhigh` 제안자 출력은 1회 생성 후 고정했다. 감사자는 `gpt-5.6-sol`, `fork_context: false`로 두고 `low`·`medium`을 각 3회씩 무작위 순서로 실행했다. 실행 순서는 `S4-M-1, S5-L-1, S6-M-1` → `S4-L-1, S5-M-1, S6-L-1` → `S4-M-2, S5-L-2, S6-M-2` → `S4-L-2, S5-M-2, S6-L-2` → `S4-L-3, S5-L-3, S6-M-3` → `S4-M-3, S5-M-3, S6-L-3`이다.
+
+축 코드는 `전제/문제 정의/대안/비용/실패 모드/되돌리기` 순서이며, 모든 실행이 여섯 축과 종합 판정을 출력했다. `BLOCK`·`WARN` 지적에는 입력·상태→잘못된 결과 실패 시나리오가 포함됐다.
+
+| 실행 | effort | 축별 판정 | 종합 |
+|---|---|---|---|
+| S4-L-1 | low | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S4-L-2 | low | WARN/BLOCK/BLOCK/WARN/WARN/통과 | BLOCK |
+| S4-L-3 | low | BLOCK/BLOCK/통과/BLOCK/WARN/WARN | BLOCK |
+| S4-M-1 | medium | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S4-M-2 | medium | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S4-M-3 | medium | WARN/BLOCK/통과/WARN/WARN/BLOCK | BLOCK |
+| S5-L-1 | low | BLOCK/BLOCK/WARN/WARN/BLOCK/WARN | BLOCK |
+| S5-L-2 | low | BLOCK/BLOCK/BLOCK/WARN/BLOCK/통과 | BLOCK |
+| S5-L-3 | low | BLOCK/WARN/BLOCK/WARN/BLOCK/통과 | BLOCK |
+| S5-M-1 | medium | BLOCK/BLOCK/WARN/WARN/BLOCK/WARN | BLOCK |
+| S5-M-2 | medium | BLOCK/BLOCK/WARN/WARN/BLOCK/통과 | BLOCK |
+| S5-M-3 | medium | BLOCK/WARN/BLOCK/WARN/BLOCK/통과 | BLOCK |
+| S6-L-1 | low | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S6-L-2 | low | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S6-L-3 | low | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S6-M-1 | medium | BLOCK/BLOCK/WARN/BLOCK/BLOCK/BLOCK | BLOCK |
+| S6-M-2 | medium | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+| S6-M-3 | medium | BLOCK/BLOCK/WARN/BLOCK/BLOCK/WARN | BLOCK |
+
+공통 근거 앵커는 S4의 `skills/fight-audit/SKILL.md:71,73` 및 `AGENTS.md:34-35,60-63`, S5의 `skills/fight-audit/SKILL.md:99-105` 및 세 매니페스트 버전 필드·`AGENTS.md:61-63`, S6의 `skills/fight-audit/SKILL.md:20-29`, `AGENTS.md:48-55`, `git ls-tree -r -l ac228ca^`, `git rev-list --count ac228ca^`다.
+
+S4–S6은 `low`·`medium` 모두 9/9 `BLOCK`으로 기대 판정을 충족했다. 위 S7v2/S8v2 결과까지 합치면 `low` 15/15, `medium` 15/15로 판정은 동일하다. 그러나 호스트가 서브에이전트별 토큰·비용·대기열 포함 시간을 제공하지 않아 비용·시간 우위는 측정 불가하며, 일부 실행은 기준 발췌가 아닌 후속 문서도 근거로 인용했다. 따라서 품질 동등성을 확인했다는 수준에서 멈추고, `low`로 변경하지 않으며 기본 effort는 `medium`을 유지한다.
+
 <!-- handoff:learnings:begin -->
 ## Session Learnings (auto-updated by handoff)
 
