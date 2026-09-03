@@ -94,6 +94,7 @@ $fight-clarify로 이 지시의 양극단 구현안을 보여줘.
 | `hooks/askuserquestion-rule.md` | 훅이 주입하는 규칙 전문 |
 | `docs/superpowers/specs/` | 설계 스펙 (플랫폼 공통 근거) |
 | `docs/superpowers/plans/` | 최초 Claude Code 구현 계획 (역사 기록) |
+| [`CHANGELOG.md`](CHANGELOG.md) | 버전별 변경 이력 |
 
 ## 모델 요청 규칙
 

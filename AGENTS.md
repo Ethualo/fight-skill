@@ -60,6 +60,7 @@ Claude Code 설치와 공통 개요는 [CLAUDE.md](CLAUDE.md)를 참고한다. `
 - 외부 provider·CLI·MCP fallback을 추가하지 않음
 - 지정 모델을 사용할 수 없으면 조용히 다른 모델로 대체하지 않고 중단
 - `skills/*/SKILL.md` 변경 시 두 플랫폼 매니페스트(`.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`) 버전을 모두 올리고 재검증
+- 버전을 올릴 때는 `CHANGELOG.md`에도 해당 버전 항목을 남긴다
 - 감사자의 근거 없는 통과나 실패 시나리오 없는 지적을 허용하지 않음
 - 설치된 Claude Code 플러그인은 `~/.claude/plugins/cache/fight/fight/{version}/`의 버전별 스냅샷 복사본이다. 저장소 편집만으로는 실행 중인 내용이 바뀌지 않는다 — 버전을 올리고 `claude plugin update fight@fight`를 실행해야 반영된다
 

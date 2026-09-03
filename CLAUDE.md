@@ -56,6 +56,7 @@ Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.m
 - **`fight-clarify`는 축을 하나만 고른다.** 두 개 이상 벌리면 두 안의 차이를 읽을 수 없다.
 - **훅은 Node.js에 의존한다.** `cat`은 Windows `cmd`에 없고 `echo`는 UTF-8 여러 줄을 깨뜨려서 `node`를 쓴다. 플러그인 루트 경로는 `process.env.CLAUDE_PLUGIN_ROOT`로 읽지 않고 `${CLAUDE_PLUGIN_ROOT}`를 커맨드 문자열에 그대로 넣어 `argv`로 넘긴다. Claude Code가 셸에 넘기기 전에 문자열 치환을 하므로 환경변수 미설정에 영향받지 않는다.
 - 스킬 본문을 고치면 `plugin.json`의 patch 버전을 올린다.
+- 버전을 올릴 때는 `CHANGELOG.md`에도 해당 버전 항목을 남긴다.
 
 ## 검증
 
