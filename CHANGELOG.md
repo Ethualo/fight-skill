@@ -3,6 +3,12 @@
 이 프로젝트의 버전별 변경 이력이다. [Keep a Changelog](https://keepachangelog.com/) 형식을 따른다.
 `0.1.0` 이전 상세 커밋 이력은 `git log`를 참고한다.
 
+## [0.3.9] - 2026-09-04
+
+### Changed
+
+- `fight-clarify`의 Claude Code 두 호출 모델을 부모 세션 상속에서 `sonnet` 고정으로 변경 (`skills/fight-clarify/SKILL.md`, `CLAUDE.md`, `AGENTS.md`, `README.md`)
+
 ## [0.3.8] - 2026-09-02
 
 ### Changed

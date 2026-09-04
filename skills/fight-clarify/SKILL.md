@@ -37,7 +37,7 @@ Claude Code의 `AskUserQuestion`에서 "모르겠음 — 양극단 두 안 보�
 
 두 서브에이전트를 **같은 메시지에서** 호출한다. 순차로 돌리지 마라.
 
-**Claude Code:** `Agent` 툴 2회. `subagent_type: general-purpose`, `run_in_background: false`.
+**Claude Code:** `Agent` 툴 2회. `subagent_type: general-purpose`, `model: sonnet`, `run_in_background: false`.
 
 **Codex:** subagent spawn 도구 2회. `model: gpt-5.6-luna`, reasoning effort `max`, `fork_context: false`. 지정 모델을 쓸 수 없으면 다른 모델로 조용히 대체하지 말고 유저에게 중단 사유를 알린다.
 

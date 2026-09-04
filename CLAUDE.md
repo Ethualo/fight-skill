@@ -41,7 +41,7 @@ Codex 유지보수·모델·검증 명령은 [AGENTS.md](AGENTS.md)를 참고한
 
 | 플랫폼 | `fight-audit` | `fight-clarify` |
 |---|---|---|
-| Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
+| Claude Code | 제안자 `sonnet`, 감사자 `opus` | 두 호출 모두 `sonnet` 고정 |
 
 Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.md)의 환경과 주요 패턴을 기준으로 한다. 표의 모델은 스킬이 요청하는 값이며, 매니페스트가 모델 가용성·대체 여부를 강제하지는 않는다.
 

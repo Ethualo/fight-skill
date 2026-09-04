@@ -1,6 +1,6 @@
 # fight
 
-![version](https://img.shields.io/badge/version-0.3.7-blue)
+![version](https://img.shields.io/badge/version-0.3.9-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-lightgrey)
 
@@ -100,7 +100,7 @@ $fight-clarify로 이 지시의 양극단 구현안을 보여줘.
 
 | 플랫폼 | `fight-audit` | `fight-clarify` |
 |---|---|---|
-| Claude Code | 제안자 `sonnet`, 감사자 `opus` | 부모 세션 모델 상속 |
+| Claude Code | 제안자 `sonnet`, 감사자 `opus` | 두 호출 모두 `sonnet` 고정 |
 | Codex | 제안자 `gpt-5.6-terra`(xhigh), 감사자 `gpt-5.6-sol`(medium) | 두 호출 모두 `gpt-5.6-luna`(max) |
 
 표의 값은 `SKILL.md`가 호스트에 요청하는 모델·reasoning effort이지, 매니페스트가 강제하는 실행 설정은 아니다. Claude Code는 조직 허용 목록에 따라 요청 모델을 대체할 수 있고, Codex도 호스트의 모델 가용성에 좌우된다. 요청한 설정을 지킬 수 없거나 대체가 보고되면 메인 에이전트는 이를 밝히고 검증 호출을 중단해야 한다. 이 중단은 메인 에이전트의 준수 규칙이며 플러그인 자체가 자동 검증·차단하지는 않는다.
