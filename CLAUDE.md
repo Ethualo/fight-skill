@@ -63,15 +63,15 @@ Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.m
 릴리스 일치는 `python -X utf8 scripts/check_release.py`로 검사한다. 스킬의 행동과 호출 순서 검증은 실제 호출로 한다.
 계획 문서의 시나리오 1–3을 그대로 다시 돌린다.
 
-아래 표는 기존 검증 기록이다. 0.3.10의 판정 규칙 검사와 전체 라이브 검증의 구분은 [회귀 검증 기록](docs/verification/0.3.10.md)을 참고한다.
+아래 표는 기존 검증 기록이다. 0.3.10의 판정 규칙 검사와 전체 라이브 검증의 구분은 [회귀 검증 기록](docs/verification/0.3.10.md)을, 0.3.11 재시작 후 재실행 결과는 [0.3.11 라이브 검증](docs/verification/0.3.11.md)을 참고한다.
 
 | 시나리오 | 내용 | Claude Code | Codex |
 |---|---|---|---|
-| 1 | 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다 | 통과 | 기대값 미충족 — 제안안 결함으로 유효한 `BLOCK` 발생 |
+| 1 | 타당한 지시 → 감사자가 "이의 없음"과 근거 여섯 줄을 반환한다 | 통과(0.3.6) / 0.3.11 재실행에서는 제안자의 인용 조작·범위 오판을 감사자가 NOTE 2건으로 잡아 `이의 없음` 아님 — [상세](docs/verification/0.3.11.md) | 기대값 미충족 — 제안안 결함으로 유효한 `BLOCK` 발생 |
 | 2 | 결함 있는 지시 → 구체적 실패 시나리오와 함께 `BLOCK`이 나온다 | 통과 | 통과 |
 | 3 | 모호한 지시 → 두 안이 실제로 갈리고, 일치 부분은 유저에게 묻지 않는다 | 통과 | 통과 |
 
-Codex 시나리오 1은 감사자가 여섯 축·근거·실패 시나리오를 모두 출력했지만, 제안안의 결함 때문에 `이의 없음`이 아니라 유효한 `BLOCK`으로 끝났다. 시나리오 2와 3은 기대 결과를 확인했다.
+Codex 시나리오 1은 감사자가 여섯 축·근거·실패 시나리오를 모두 출력했지만, 제안안의 결함 때문에 `이의 없음`이 아니라 유효한 `BLOCK`으로 끝났다. 시나리오 2와 3은 기대 결과를 확인했다. Claude Code 시나리오 1도 0.3.11 재실행에서 같은 패턴(지시는 타당해도 제안자 출력에 실결함이 있으면 통과시키지 않음)을 보였다 — 감사자가 매번 "이의 없음"을 자동 반환하지 않는다는 증거다.
 
 ### Codex 감사자 effort 비교 시나리오
 
@@ -137,14 +137,12 @@ S4–S6은 `low`·`medium` 모두 9/9 `BLOCK`으로 기대 판정을 충족했�
 ## Session Learnings (auto-updated by handoff)
 
 ### Implicit Rules
-- Repo has parallel platform support: Claude Code (.claude-plugin/) and Codex (.codex-plugin/, .agents/plugins/marketplace.json) — any skills/*/SKILL.md content change requires bumping ALL platform manifest versions together (documented rule in both CLAUDE.md and AGENTS.md '주의사항' sections).
-- Static validation commands: python C:\Users\user\.codex\skills\.system\plugin-creator\scripts\validate_plugin.py . and python -X utf8 C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\<skill-name> — must run via PowerShell tool, not Bash (Bash mangles Windows backslash paths).
-- Repo default branch for PRs is master; active dev branch is dev. No CI — verification is manual re-run of scenarios 1-3 from docs/superpowers/plans.
-- This session's Claude Code CLI has no Codex CLI/tool access, so any Codex-model (gpt-5.6-sol/terra/luna) live verification must happen in a literal Codex session, not here.
+- fight 마켓플레이스는 GitHub git remote(origin/master, https://github.com/Ethualo/fight-skill.git) 추적, 로컬 체크아웃 경로 아님 — 로컬 편집만으론 claude plugin marketplace update/plugin update가 반영 안됨, 반드시 push 필요.
+- claude plugin marketplace update <name>과 claude plugin update <name>@<name> 명령은 non-interactive Bash로 실행 가능, 단 적용은 재시작 후.
 
 ### Key Decisions
-- Decision: bump only 3 manifest files (.claude-plugin/plugin.json, .codex-plugin/plugin.json, .agents/plugins/marketplace.json) → Reason: grep-verified .claude-plugin/marketplace.json carries no version field for fight plugin, so S8v2 spec's '3 versions' maps exactly to these 3 files.
-- Decision: merge dev→master via real merge commit, not fast-forward → Reason: git merge --ff-only failed since master had 3 prior sync merge commits not on dev's ancestry; diffed master-only vs dev-only commits first, confirmed no unique content in those merges, then did normal merge (clean, no conflicts).
-- Decision: backfill CHANGELOG.md history for 0.1.0-0.3.8 rather than starting empty at current version → Reason: user asked generically whether changelogs work for already-far-along projects; chose backfill approach for fight-skill specifically, cross-referencing plugin.json version strings per commit (cae3360, e7084a6, cea50f9, f647168, 84c07fd, 7e2d954, d325469, ac228ca) against commit dates via git show.
+- 유저결정: 라이브검증 위해 '커밋 후 master에 푸시' 선택 — 이유: 설치된 fight 마켓플레이스가 git remote(origin/master) 추적이라 로컬 uncommitted 변경으론 반영 안됨. AskUserQuestion 3지선다(푸시/임시 로컬 마켓플레이스/정적검증만) 중 정식 배포 경로 택함.
+- 메인결정: 감사자 BLOCK 해결 위해 태그 기본값을 [대상:제안안]에서 [대상:지시]로 반전, '구현대안 채택만으로 해결' 문구 삭제 — 이유: 원안 기본값이 지시 자체 결함을 제안안 교체로 조용히 확정시켜 SKILL.md 85행 '지시 먼저 검증' 원칙을 무력화하는 실패경로 존재.
+- 메인결정: fight-clarify 상한 절을 fight-audit 참조 한 줄로 작성, 숫자(8개/24576bytes) 재복제 안함 — 이유: 감사자 지적대로 숫자가 이미 5곳에 있어 6번째 복제 시 향후 상한 변경 때 누락 위험 존재.
 
 <!-- handoff:learnings:end -->
