@@ -1,7 +1,7 @@
 {
   "name": "fight",
   "description": "적대적 검증 — 컨텍스트가 격리된 두 서브에이전트로 유저 지시를 검증하고 모호한 지시를 구체화한다",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "repository": "https://github.com/Ethualo/fight-skill",
   "homepage": "https://github.com/Ethualo/fight-skill"
 }

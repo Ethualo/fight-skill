@@ -11,12 +11,14 @@ Claude Code 설치와 공통 개요는 [CLAUDE.md](CLAUDE.md)를 참고한다. `
 - `hooks/`: Claude Code 전용 SessionStart 훅. Codex는 사용하지 않음
 - `skills/fight-audit/`: 제안자·감사자 비대칭 검증 프로토콜 (양 플랫폼 공유)
 - `skills/fight-clarify/`: 양극단 해석 병렬 분기 프로토콜 (양 플랫폼 공유)
+- `scripts/check_release.py`: 세 매니페스트·README 버전·모델 표·변경 이력 일치 검사
 - `docs/superpowers/`: 설계 스펙과 최초 Claude Code 구현 계획. 역할 구조(비대칭·대칭)의 근거는 지금도 유효하다
 
 ## 실행 및 검증
 
 ### 정적 검증
 
+- 릴리스 일치 검사: `python -X utf8 scripts/check_release.py`
 - Codex 플러그인 검증: `python C:\Users\user\.codex\skills\.system\plugin-creator\scripts\validate_plugin.py .`
 - 스킬 검증: `python -X utf8 C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\fight-audit`
 - 스킬 검증: `python -X utf8 C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py skills\fight-clarify`
@@ -25,7 +27,7 @@ Claude Code 설치와 공통 개요는 [CLAUDE.md](CLAUDE.md)를 참고한다. `
 
 - Codex와 Claude Code 각각에서 두 스킬을 실제 호출해 subagent 수·순서·출력을 확인한다.
 - 감사자는 파일·줄 또는 명령 근거와 구체적 실패 시나리오를 남겨야 한다.
-- 해석자는 같은 메시지에서 병렬 실행하고, 두 안의 공통점은 묻지 않는다.
+- 해석자는 같은 메시지에서 병렬 실행한다. 근거 있는 공통점은 재질문하지 않고, 근거 없는 공통 가정은 미확정으로 남긴다.
 
 ## 환경
 
@@ -59,7 +61,7 @@ Claude Code 설치와 공통 개요는 [CLAUDE.md](CLAUDE.md)를 참고한다. `
 
 - 외부 provider·CLI·MCP fallback을 추가하지 않음
 - 지정 모델을 사용할 수 없으면 조용히 다른 모델로 대체하지 않고 중단
-- `skills/*/SKILL.md` 변경 시 두 플랫폼 매니페스트(`.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`) 버전을 모두 올리고 재검증
+- `skills/*/SKILL.md` 변경 시 `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, `.agents/plugins/marketplace.json` 세 버전을 함께 올리고 재검증
 - 버전을 올릴 때는 `CHANGELOG.md`에도 해당 버전 항목을 남긴다
 - 감사자의 근거 없는 통과나 실패 시나리오 없는 지적을 허용하지 않음
 - 설치된 Claude Code 플러그인은 `~/.claude/plugins/cache/fight/fight/{version}/`의 버전별 스냅샷 복사본이다. 저장소 편집만으로는 실행 중인 내용이 바뀌지 않는다 — 버전을 올리고 `claude plugin update fight@fight`를 실행해야 반영된다

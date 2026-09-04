@@ -39,7 +39,7 @@
   <text x="555" y="207" text-anchor="middle" class="detail">구현안 + 가정</text>
   <text x="815" y="207" text-anchor="middle" class="detail">지시 + 제안안</text>
   <text x="1075" y="207" text-anchor="middle" class="detail">6축 판정 + 실패 시나리오</text>
-  <text x="690" y="355" text-anchor="middle" class="caption">합의는 확정 · 충돌만 질문</text>
+  <text x="690" y="355" text-anchor="middle" class="caption">BLOCK 처리 기록 · 미해결·미검증이면 확정 보류</text>
 
   <rect x="45" y="445" width="1310" height="370" rx="20" fill="#ffffff" stroke="#d0d7de" stroke-width="2"/>
   <text x="75" y="490" class="section">fight-clarify · 같은 메시지에서 병렬 2회 호출</text>
@@ -51,7 +51,7 @@
   <text x="565" y="725" text-anchor="middle" class="node">해석자 B · 극단 2</text>
   <rect x="1010" y="600" width="270" height="84" rx="14" fill="#1a7f37"/>
   <text x="1145" y="638" text-anchor="middle" class="node">메인 비교</text>
-  <text x="1145" y="665" text-anchor="middle" class="node">일치점 확정 · 차이점 질문</text>
+  <text x="1145" y="665" text-anchor="middle" class="node">근거 확인 · 차이·가정 질문</text>
   <path d="M 280 620 C 340 620, 365 577, 435 577" class="line"/>
   <path d="M 280 665 C 340 665, 365 717, 435 717" class="line"/>
   <path d="M 685 577 C 810 577, 855 620, 1000 620" class="dash"/>

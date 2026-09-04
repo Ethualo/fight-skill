@@ -3,6 +3,19 @@
 이 프로젝트의 버전별 변경 이력이다. [Keep a Changelog](https://keepachangelog.com/) 형식을 따른다.
 `0.1.0` 이전 상세 커밋 이력은 `git log`를 참고한다.
 
+## [0.3.10] - 2026-09-04
+
+### Fixed
+
+- `fight-clarify`에서 근거 없는 공통 가정을 확정하지 않고 미확정 항목으로 유지
+- `fight-audit`에서 모든 `BLOCK`의 처리 결과를 보존하고 `미검증` 판정과 확정 보류 규칙 추가
+- clarify 진행 중 사용자 질문에서 같은 스킬로 재진입하는 옵션 제외
+- 한국어 README 모델 정책과 세 배포 버전 갱신 안내 동기화
+
+### Added
+
+- 세 매니페스트·두 README·변경 이력의 일치를 확인하는 `scripts/check_release.py`
+
 ## [0.3.9] - 2026-09-04
 
 ### Changed

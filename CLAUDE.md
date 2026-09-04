@@ -55,13 +55,15 @@ Codex 모델·reasoning·`fork_context`·fallback 정책은 [AGENTS.md](AGENTS.m
 - **감사자에게 "이의 없음"을 허용해야 한다.** 매번 무언가를 내라고 강제하면 그 자체가 억지 반대다.
 - **`fight-clarify`는 축을 하나만 고른다.** 두 개 이상 벌리면 두 안의 차이를 읽을 수 없다.
 - **훅은 Node.js에 의존한다.** `cat`은 Windows `cmd`에 없고 `echo`는 UTF-8 여러 줄을 깨뜨려서 `node`를 쓴다. 플러그인 루트 경로는 `process.env.CLAUDE_PLUGIN_ROOT`로 읽지 않고 `${CLAUDE_PLUGIN_ROOT}`를 커맨드 문자열에 그대로 넣어 `argv`로 넘긴다. Claude Code가 셸에 넘기기 전에 문자열 치환을 하므로 환경변수 미설정에 영향받지 않는다.
-- 스킬 본문을 고치면 `plugin.json`의 patch 버전을 올린다.
+- 스킬 본문을 고치면 `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json` 세 버전의 patch를 함께 올린다.
 - 버전을 올릴 때는 `CHANGELOG.md`에도 해당 버전 항목을 남긴다.
 
 ## 검증
 
-단위 테스트가 없다. 실행 로직이 없기 때문이다. 검증은 실제 호출로 한다.
+릴리스 일치는 `python -X utf8 scripts/check_release.py`로 검사한다. 스킬의 행동과 호출 순서 검증은 실제 호출로 한다.
 계획 문서의 시나리오 1–3을 그대로 다시 돌린다.
+
+아래 표는 기존 검증 기록이다. 0.3.10의 판정 규칙 검사와 전체 라이브 검증의 구분은 [회귀 검증 기록](docs/verification/0.3.10.md)을 참고한다.
 
 | 시나리오 | 내용 | Claude Code | Codex |
 |---|---|---|---|
