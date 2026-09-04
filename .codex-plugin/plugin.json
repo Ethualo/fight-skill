@@ -1,6 +1,6 @@
 {
   "name": "fight-skill",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "description": "Claude Code와 Codex에서 지시를 검증하고 모호한 요구를 구체화한다",
   "author": {
     "name": "Ethualo"

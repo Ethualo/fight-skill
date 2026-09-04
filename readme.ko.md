@@ -1,6 +1,6 @@
 # fight
 
-![version](https://img.shields.io/badge/version-0.3.10-blue)
+![version](https://img.shields.io/badge/version-0.3.11-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![platform](https://img.shields.io/badge/platform-Claude%20Code%20%7C%20Codex-lightgrey)
 
